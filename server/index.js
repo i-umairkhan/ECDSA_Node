@@ -6,10 +6,11 @@ const port = 3042;
 app.use(cors());
 app.use(express.json());
 
+// address with their assosiated balances
 const balances = {
-  "0x1": 100,
-  "0x2": 50,
-  "0x3": 75,
+  "0x8d955a85f24b71b24531ea22392298dfdfb9776a": 100,
+  "0xe30f4a295222e17ba85e72345e7ab3e8ecf5fb81": 50,
+  "0x0ea78f4fc2526e2a63b6f68750daeb423741815e": 75,
 };
 
 app.get("/balance/:address", (req, res) => {

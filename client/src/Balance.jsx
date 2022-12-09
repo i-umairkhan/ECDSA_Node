@@ -1,6 +1,6 @@
 function Balance() {
   return (
-    <form className="container transfer">
+    <div className="container wallet">
       <h1>Check Balance</h1>
 
       <label>
@@ -10,8 +10,8 @@ function Balance() {
 
       <div className="balance">Wallet Balance: </div>
 
-      <input type="submit" className="button" value="Transfer" />
-    </form>
+      <button className="button">Check Balance</button>
+    </div>
   );
 }
 

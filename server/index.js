@@ -8,9 +8,7 @@ app.use(express.json());
 
 // address with their assosiated balances
 const balances = {
-  "0x8d955a85f24b71b24531ea22392298dfdfb9776a": 100,
-  "0xe30f4a295222e17ba85e72345e7ab3e8ecf5fb81": 50,
-  "0x0ea78f4fc2526e2a63b6f68750daeb423741815e": 75,
+  "0x62d796f2d4c52c3645480b3dced884e4dd641c44": 100,
 };
 
 app.get("/balance/:address", (req, res) => {

@@ -2,14 +2,20 @@ import { useState } from "react";
 import { generateAddress, _publicKey, _address } from "./generateAddress";
 import { toHex } from "ethereum-cryptography/utils";
 import server from "./server";
+import { useEffect } from "react";
 
 function Transaction() {
-  // Private Key : ee932232f63b973919ada07ad5214dfe591433da8fbca22ebf31ab9f0d9dfc0d
   // states
   const [privateKey, setPrivateKey] = useState("");
   const [publicKey, setPublicKey] = useState(new Uint8Array());
   const [address, setAddress] = useState(new Uint8Array());
   const [balance, setBalance] = useState(0);
+
+  useEffect(() => {
+    server
+      .get(`/balance/0x${toHex(address)}`)
+      .then((r) => setBalance(r.data.balance));
+  }, [address]);
 
   return (
     <div className="container wallet">
@@ -29,7 +35,6 @@ function Transaction() {
           generateAddress(privateKey);
           setPublicKey(_publicKey);
           setAddress(_address);
-          server.get(`/balance/${address}`).then((r) => console.log(r));
         }}
       >
         Fetch Data
@@ -39,14 +44,15 @@ function Transaction() {
         Public Key:
         <br />
         {toHex(publicKey).slice(0, 7)}
-        .....
+        {publicKey.length > 10 && `.....`}
         {toHex(publicKey).slice(-7)}
       </div>
 
       <div className="highlight balance">
         Wallet Address:
         <br />
-        0x{toHex(address)}
+        {address.length > 10 && `0x`}
+        {toHex(address)}
       </div>
 
       <div className="highlight balance">Wallet Balance: {balance}</div>

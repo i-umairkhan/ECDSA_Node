@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { generateAddress, _publicKey, _address } from "./generateAddress";
 import { toHex } from "ethereum-cryptography/utils";
+import * as secp from "ethereum-cryptography/secp256k1";
+import { sha256 } from "ethereum-cryptography/sha256";
 import server from "./server";
 import { useEffect } from "react";
 
@@ -10,12 +12,48 @@ function Transaction() {
   const [publicKey, setPublicKey] = useState(new Uint8Array());
   const [address, setAddress] = useState(new Uint8Array());
   const [balance, setBalance] = useState(0);
+  const [recipient, setRecipient] = useState("");
+  const [sendBalance, setSendBalance] = useState(0);
+  const [data, setData] = useState({});
+  const [signature, setSignature] = useState(new Uint8Array());
+
+  // to get balance of address from server
+  useEffect(() => {
+    if (toHex(address)) {
+      server
+        .get(`/balance/0x${toHex(address)}`)
+        .then((r) => setBalance(r.data.balance));
+    }
+  }, [address]);
 
   useEffect(() => {
-    server
-      .get(`/balance/0x${toHex(address)}`)
-      .then((r) => setBalance(r.data.balance));
-  }, [address]);
+    if (toHex(signature)) {
+      let d = Uint8Array.from(JSON.stringify(data));
+      let recoverdKey = secp.recoverPublicKey(sha256(d), signature, 1);
+      console.log("Recoverd Public key:" + toHex(recoverdKey));
+    }
+  }, [signature]);
+
+  // to sign a signature with hash data and private key
+  useEffect(() => {
+    if (data && privateKey) {
+      let d = Uint8Array.from(JSON.stringify(data));
+      secp.sign(sha256(d), privateKey).then((s) => {
+        setSignature(s);
+      });
+    }
+  }, [data]);
+
+  // create a data is used to sign a message
+  function transferFunds() {
+    if (balance >= sendBalance && balance > 0 && recipient) {
+      setData({
+        SenderAddress: `0x${toHex(address)}`,
+        RecipientAddress: recipient,
+        BalanceToSend: sendBalance,
+      });
+    }
+  }
 
   return (
     <div className="container wallet">
@@ -26,6 +64,7 @@ function Transaction() {
         <input
           value={privateKey}
           onChange={(e) => setPrivateKey(e.target.value)}
+          type="password"
         />
       </label>
 
@@ -37,7 +76,7 @@ function Transaction() {
           setAddress(_address);
         }}
       >
-        Fetch Data
+        Get Public key + Address + Balance
       </button>
 
       <div className="highlight balance">
@@ -59,15 +98,23 @@ function Transaction() {
 
       <label>
         Recipient Address
-        <input></input>
+        <input
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+        />
       </label>
 
       <label>
         Enter Amount to send
-        <input></input>
+        <input
+          value={sendBalance}
+          onChange={(e) => setSendBalance(e.target.value)}
+        />
       </label>
 
-      <input type="submit" className="button" value="Transfer" />
+      <button className="button" onClick={() => transferFunds()}>
+        Transfer
+      </button>
     </div>
   );
 }

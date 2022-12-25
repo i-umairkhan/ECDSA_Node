@@ -37,7 +37,7 @@ secp
   })
   .then(() => {
     // recovering public from message , signature & recovery bit
-    recoverdKey = secp.recoverPublicKey(sha256(mesg), signature, 0);
+    recoverdKey = secp.recoverPublicKey(sha256(mesg), signature, 1);
     console.log("Recoverd Public key:" + toHex(recoverdKey));
   })
   .then(() => {

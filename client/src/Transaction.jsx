@@ -26,13 +26,16 @@ function Transaction() {
     }
   }, [address]);
 
-  useEffect(() => {
-    if (toHex(signature)) {
-      let d = Uint8Array.from(JSON.stringify(data));
-      let recoverdKey = secp.recoverPublicKey(sha256(d), signature, 1);
-      console.log("Recoverd Public key:" + toHex(recoverdKey));
+  // create a data is used to sign a message
+  function transferFunds() {
+    if (sendBalance && balance >= sendBalance && balance > 0 && recipient) {
+      setData({
+        SenderAddress: `0x${toHex(address)}`,
+        RecipientAddress: recipient,
+        BalanceToSend: sendBalance,
+      });
     }
-  }, [signature]);
+  }
 
   // to sign a signature with hash data and private key
   useEffect(() => {
@@ -44,16 +47,28 @@ function Transaction() {
     }
   }, [data]);
 
-  // create a data is used to sign a message
-  function transferFunds() {
-    if (balance >= sendBalance && balance > 0 && recipient) {
-      setData({
-        SenderAddress: `0x${toHex(address)}`,
-        RecipientAddress: recipient,
-        BalanceToSend: sendBalance,
-      });
+  // send tranasaction to server when signature has generated
+  useEffect(() => {
+    if (toHex(signature)) {
+      let d = Uint8Array.from(JSON.stringify(data));
+      const recoverdKey = secp.recoverPublicKey(sha256(d), signature, 1);
+      console.log(toHex(recoverdKey));
+      if (toHex(recoverdKey) == toHex(publicKey)) {
+        sendTranasctions();
+      }
     }
-  }
+  }, [signature]);
+
+  // sending tranasaction to server
+  const sendTranasctions = () => {
+    server
+      .post(
+        "/send",
+        { data },
+        { headers: { "Content-Type": "application/json" } }
+      )
+      .then((r) => console.log(r));
+  };
 
   return (
     <div className="container wallet">

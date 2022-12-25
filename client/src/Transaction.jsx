@@ -16,6 +16,7 @@ function Transaction() {
   const [sendBalance, setSendBalance] = useState(0);
   const [data, setData] = useState({});
   const [signature, setSignature] = useState(new Uint8Array());
+  const [info, setInfo] = useState("");
 
   // to get balance of address from server
   useEffect(() => {
@@ -52,7 +53,6 @@ function Transaction() {
     if (toHex(signature)) {
       let d = Uint8Array.from(JSON.stringify(data));
       const recoverdKey = secp.recoverPublicKey(sha256(d), signature, 1);
-      console.log(toHex(recoverdKey));
       if (toHex(recoverdKey) == toHex(publicKey)) {
         sendTranasctions();
       }
@@ -67,7 +67,7 @@ function Transaction() {
         { data },
         { headers: { "Content-Type": "application/json" } }
       )
-      .then((r) => console.log(r));
+      .then(() => setInfo("Transaction Completed"));
   };
 
   return (
@@ -130,6 +130,8 @@ function Transaction() {
       <button className="button" onClick={() => transferFunds()}>
         Transfer
       </button>
+
+      {info && <div className="balance">{info}</div>}
     </div>
   );
 }

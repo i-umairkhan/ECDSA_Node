@@ -28,6 +28,7 @@ function Transaction() {
   }, [address]);
 
   // create a data is used to sign a message
+  // also checks constraints of balances
   function transferFunds() {
     if (sendBalance && balance >= sendBalance && balance > 0 && recipient) {
       setData({
@@ -39,6 +40,7 @@ function Transaction() {
   }
 
   // to sign a signature with hash data and private key
+  // requires private key & data to generate signatue so intented user can only generate signature
   useEffect(() => {
     if (data && privateKey) {
       let d = Uint8Array.from(JSON.stringify(data));
